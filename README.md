@@ -68,3 +68,11 @@ Verify public root, `/health`, WebSocket transport and two independent clients a
 ## Manual phone test
 
 Use a real phone and a separate computer or second phone. Create/join, Ready both and start. Check both avatars, independent movement, joystick release, camera drag, shared scan, portrait/landscape layout and readable HUD. Switch away/reload within 90 seconds; verify restored identity without duplicates. Disconnect the host and verify transfer. Return to lobby and start again. Use Controls → Performance for actual-device FPS. No physical phone was tested in this workspace.
+
+## M2 public staging
+
+Playable Free staging: https://timefall-2126-m2-staging.onrender.com/
+
+Source: https://github.com/tirloknayani-pixel/timefall-2126-m2-staging
+
+Free instances may sleep while idle and take 50 seconds or more to wake. Server restarts clear in-memory rooms. Open the site before sharing a code. Browser acceptance supports an optional `BROWSER_PROXY` for managed test environments; do not commit proxy credentials. HTTPS validation remains enabled.

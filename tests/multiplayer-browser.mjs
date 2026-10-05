@@ -7,7 +7,7 @@ const out=resolve(process.env.BASE_URL?'evidence/staging':'evidence/local');awai
 const runtime=process.env.BASE_URL?null:createTimefallApp();const base=process.env.BASE_URL||`http://127.0.0.1:${await runtime.listen()}`;
 const executablePath=process.env.CHROMIUM_PATH||resolve('../browser-runtime/chromium');
 const browsers=[],errors=[],checks=[],metrics={environment:'Headless Chromium 153, SwiftShader software WebGL; no physical phone',base};
-const launch=()=>chromium.launch({executablePath,args:['--no-sandbox','--no-zygote','--single-process','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'],env:{...process.env,LD_LIBRARY_PATH:dirname(executablePath),FONTCONFIG_PATH:resolve(dirname(executablePath),'fonts')}});
+const launch=()=>chromium.launch({executablePath,...(process.env.BROWSER_PROXY?{proxy:{server:process.env.BROWSER_PROXY}}:{}),args:['--no-sandbox','--no-zygote','--single-process','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'],env:{...process.env,LD_LIBRARY_PATH:dirname(executablePath),FONTCONFIG_PATH:resolve(dirname(executablePath),'fonts')}});
 const record=(name,condition=true)=>{assert.ok(condition,name);checks.push({name,result:'PASS'});console.log('PASS',name);};
 const view=p=>p.evaluate(()=>window.__M2);
 const wait=(p,fn,arg)=>p.waitForFunction(fn,arg,{timeout:45000});
