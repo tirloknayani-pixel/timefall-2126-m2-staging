@@ -1,6 +1,6 @@
-# TIMEFALL: 2126 — Milestone 2
+# TIMEFALL: 2126 — Milestone 3
 
-A cinematic low-poly Three.js adventure prototype with genuine server-authoritative multiplayer. Two to six explorers arrive in an abandoned future city, scan a shared emergency beacon and trace a distant portal signal. M2 implements rooms, movement and shared exploration. Survival systems and endings belong to later milestones.
+A cinematic low-poly Three.js adventure prototype with genuine server-authoritative multiplayer. Two to six explorers arrive in an abandoned future city, scan a shared emergency beacon and trace a distant portal signal. M3 adds server-authoritative survival, supplies, a security drone, a timed two-operator encounter, and teammate revival. Later routes and endings remain out of scope.
 
 ## Install, build and run
 
@@ -30,7 +30,7 @@ Temporary disconnects reserve a slot for 90 seconds. Reload or return in the sam
 
 `shared/` contains strict Zod schemas, types and map geometry. `src/network.ts` handles transport and prediction. `src/main.ts`, `world.ts`, `controls.ts` and `style.css` preserve M1's graphics and controls while presenting server state. Cryptographically random reconnect tokens use tab-scoped sessionStorage only for restoration; tokens never enter teammate broadcasts. Duplicate nicknames do not determine identity. Packet limits and rate bounds constrain malfunctioning clients.
 
-Rooms are in-memory and single-process. Server restarts lose rooms. Run exactly one instance; scaling requires shared authoritative infrastructure beyond M2. Do not share reconnect tokens/browser storage.
+Rooms are in-memory and single-process. Server restarts lose rooms. Run exactly one instance; scaling requires shared authoritative infrastructure beyond M3. Do not share reconnect tokens/browser storage.
 
 ## Tests
 
@@ -69,10 +69,30 @@ Verify public root, `/health`, WebSocket transport and two independent clients a
 
 Use a real phone and a separate computer or second phone. Create/join, Ready both and start. Check both avatars, independent movement, joystick release, camera drag, shared scan, portrait/landscape layout and readable HUD. Switch away/reload within 90 seconds; verify restored identity without duplicates. Disconnect the host and verify transfer. Return to lobby and start again. Use Controls → Performance for actual-device FPS. No physical phone was tested in this workspace.
 
-## M2 public staging
+## M3 staging
 
-Playable Free staging: https://timefall-2126-m2-staging.onrender.com/
+Playable Free staging: https://timefall-2126-m3-staging.onrender.com/
 
 Source: https://github.com/tirloknayani-pixel/timefall-2126-m2-staging
 
 Free instances may sleep while idle and take 50 seconds or more to wake. Server restarts clear in-memory rooms. Open the site before sharing a code. Browser acceptance supports an optional `BROWSER_PROXY` for managed test environments; do not commit proxy credentials. HTTPS validation remains enabled.
+
+## M3 survival rules
+
+All rules and positions are in `shared/survival.ts`. Initial Health 100 each, team Energy 30, Materials 2, Robot Alert 0. Walking never consumes Energy. Collect cyan cells (+20 Energy), amber material (+2), or green medical kits (+35 collector Health, capped at 100). Each supply is server-owned and can be collected once within 2.5 units. Team reserves cap at Energy 100, Materials 20, Alert 100.
+
+Scan the beacon, then approach WEST power at (-3,-17). Choose divert (45 Energy, temporarily disable drone), shielding (4 Materials, reduce damage to 5), or risky bypass (no spend, +20 Alert and 35 damage). Normal drone damage is 25 every 2 seconds inside the red circle centered (0,-24), radius 4.2; every detection adds 3 Alert.
+
+Once selected, two different explorers must operate WEST power and EAST ground (3,-17) within **45 server-controlled seconds**. Each player contributes once and each terminal accepts one contribution. Three to six players still require only two operators; others can collect or revive. Reservations retain participation for 90 seconds; expired/leaving members are removed and requirements recalculate, allowing one remaining operator if the team shrinks to one. The deadline continues during temporary disconnects.
+
+Success preserves the chosen security state. Timeout resolves once, restores normal security, adds 15 Alert and deals 30 Health to the team, including reserved players. The event cannot be retried until a host reset. Outcomes and timers are authoritative; on-screen countdown is a display of the server deadline.
+
+Health 0 means incapacitated: no movement, scans, collection or decisions. A connected standing teammate within 2.8 units can revive once to Health 40. Revive provides 2 seconds before the next drone damage, so leave the zone promptly. Medical collection cannot revive an incapacitated player. If everyone falls, the host can use Controls → Return team to lobby for a fresh run.
+
+M3 adds `survival:action` strict payload validation, range/epoch/event checks, duplicate protections and server-only spending/damage. No client Health or outcome claims are accepted. `npm test` includes 5 preserved M1 collision checks, 46 preserved M2 integration checks and 30 new real Socket.IO survival checks. `node tests/survival-browser.mjs` runs actual two-process M3 acceptance; `BASE_URL` repeats it on staging. Production smoke: `node tests/production-smoke.mjs`.
+
+## M2 recovery and scope
+
+M2 remains on repository `main` at commit `88817e11030815fd4f7a798b9602b77c353dc186` and https://timefall-2126-m2-staging.onrender.com/ . M3 source uses branch `m3-staging` in the same repository and a separate Render Free service. M1 and its backup are unchanged. No M4 route, later facility, resource crisis or portal finale is implemented.
+
+The creator reports a successful two-player physical-phone test of M2. That report does not establish physical-phone performance for M3; M3 still requires real-phone testing.

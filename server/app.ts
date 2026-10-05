@@ -23,6 +23,7 @@ export function createTimefallApp(options:Options={}){
  case 'room:reset':manager.reset(socket.id,value.epoch);break;
  case 'room:leave':{const old=manager.membership(socket.id);manager.leave(socket.id);if(old)socket.leave(old.code);break;}
  case 'player:input':manager.input(socket.id,value);stats.inputAccepted++;break;
+ case 'survival:action':manager.survivalAction(socket.id,value);break;
  case 'objective:interact':manager.interact(socket.id,value);break;
  }
  if(session)socket.join(session.code);const member=manager.membership(socket.id);reply={ok:true,...(session?{session}:{}),...(member&&event!=='player:input'?{state:manager.state(member.code)}:{}),...(event==='player:input'?{seq:value.seq}:{})};
@@ -32,7 +33,7 @@ export function createTimefallApp(options:Options={}){
  socket.on('disconnect',()=>manager.disconnect(socket.id));
  });
  const budgetTimer=setInterval(()=>{const now=(options.clock??Date.now)();for(const [ip,b] of creationBudgets)if(now-b.at>60_000)creationBudgets.delete(ip);},60_000);budgetTimer.unref();
- app.get('/health',(_req,res)=>res.json({status:'ok',milestone:2,multiplayer:true,simulationHz:20,snapshotHz:10}));
+ app.get('/health',(_req,res)=>res.json({status:'ok',milestone:3,multiplayer:true,simulationHz:20,snapshotHz:10}));
  app.use((_req,res,next)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');next();});
  app.use(express.static(options.staticRoot??resolve('dist'),{maxAge:0}));app.use((_req,res)=>res.status(404).send('Not found'));
  return {app,http,io,manager,stats,step,async listen(port=0){return await new Promise<number>(resolve=>{http.listen(port,'0.0.0.0',()=>{const address=http.address();resolve(typeof address==='object'&&address?address.port:port);});});},async close(){if(timer)clearInterval(timer);clearInterval(budgetTimer);await new Promise<void>(resolve=>io.close(()=>http.close(()=>resolve())));}};

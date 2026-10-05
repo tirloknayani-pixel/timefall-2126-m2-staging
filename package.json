@@ -1,6 +1,6 @@
 {
-  "name": "timefall-2126-m2",
-  "version": "0.2.0",
+  "name": "timefall-2126-m3",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,9 +8,10 @@
     "dev": "vite --host 0.0.0.0",
     "dev:server": "tsx server/index.ts",
     "build": "tsc -p tsconfig.server.json && tsc --noEmit && vite build",
-    "test": "node --test tests/collision.test.mjs && npm run test:integration",
+    "test": "node --test tests/collision.test.mjs && npm run test:integration && npm run test:survival",
     "test:integration": "node --test tests/integration.test.mjs",
-    "test:browser": "node tests/multiplayer-browser.mjs"
+    "test:browser": "node tests/multiplayer-browser.mjs",
+    "test:survival": "node --test tests/survival.test.mjs"
   },
   "dependencies": {
     "express": "^5.2.1",
