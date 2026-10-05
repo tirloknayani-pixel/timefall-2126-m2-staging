@@ -2,7 +2,7 @@
 A real 2–6-player cooperative Three.js browser adventure. Humans arrive in 2126, restore a beacon, survive city security, solve the HELIX facility and choose their future at the Timefall portal. Fictional nicknames only; no account needed.
 
 ## Run
-Node 24 (Node 22 also tested locally). `npm ci --include=dev`, `npm run build`, `npm start`. Open http://localhost:3000 (or the PORT printed at startup). The server binds `0.0.0.0:$PORT`; /health reports milestone 5. For development run `npm run dev:server` and `npm run dev`.
+Node 24 (24.19.0 tested locally). `npm ci --include=dev`, `npm run build`, `npm start`. Open http://localhost:3000 (or the PORT printed at startup). The server binds `0.0.0.0:$PORT`; /health reports milestone 5. For development run `npm run dev:server` and `npm run dev`.
 
 Create a room with a nickname. Share the five-character code; teammates join from their own devices. Everyone selects Ready; the host starts. Use contextual objectives and the large interaction button. Desktop: WASD/arrows, drag camera, wheel zoom, E. Phone: left joystick, right camera drag, action button. Use Quality: Low if needed.
 
@@ -23,7 +23,7 @@ All outcomes resolve exactly once on the server. Host Play Again returns everyon
 Express + Socket.IO Node server owns room membership, movement/collision, Health, team supplies/Alert, puzzles, deadlines and endings. Strict Zod schemas, epoch/event/request IDs, range and eligibility checks, capped queues and rate budgets protect actions. Server ticks 20 Hz and snapshots 10 Hz. Existing client prediction/reconciliation and remote interpolation remain. Shared gameplay constants live in `shared/survival.ts`, `facility.ts`, `portal.ts`. Client presents geometry/HUD and sends input intent; read-only `window.__M1`–`__M5` diagnostics expose no setters or reconnect tokens.
 
 ## Tests
-Build first, then `npm test` (161 tests: 5 collision, 46 multiplayer integration, 30 survival, 40 facility, 40 portal). Real Socket.IO clients connect to ephemeral authoritative servers. Tests may arrange server fixtures; browser acceptance uses physical navigation and normal UI only.
+Build first, then `npm test` (169 tests: 5 collision, 46 multiplayer integration, 30 survival, 40 facility, 48 portal). Real Socket.IO clients connect to ephemeral authoritative servers. Tests may arrange server fixtures; browser acceptance uses physical navigation and normal UI only.
 `CHROMIUM_PATH=/path/to/chromium node tests/portal-browser.mjs` launches TWO independent Chromium processes, desktop and emulated touch portrait. It includes two full normal journeys, HELIX and safe-return endings, damage/revive, reconnect, host transfer, isolation, reset and screenshots. Optional BASE_URL runs against public staging; BROWSER_PROXY supports the managed environment. Never disable TLS validation. `node tests/multiplayer-browser.mjs`, `node tests/survival-browser.mjs`, `node tests/facility-browser.mjs` retain regression checks. `node tests/production-smoke.mjs` verifies npm start, PORT, root, health and WebSocket with the compiled build.
 
 ## Deploy
