@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: timefall-2126-m2
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 24.19.0
+    numInstances: 1
