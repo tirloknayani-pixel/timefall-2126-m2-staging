@@ -1,8 +1,8 @@
 services:
   - type: web
-    name: timefall-2126-m4-staging
+    name: timefall-2126-m5-staging
     runtime: node
-    branch: m4-staging
+    branch: m5-staging
     plan: free
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
