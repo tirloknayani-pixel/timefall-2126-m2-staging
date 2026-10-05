@@ -55,7 +55,7 @@ Original M1 browser scripts are preserved in `tests/m1-preserved/`. Their solo l
 
 `render.yaml` describes a single-instance free Node web service. Push the complete project to a repository accessible to Render and create a Blueprint, or configure a Node Web Service with:
 
-- Build: `npm ci && npm run build`
+- Build: `npm ci --include=dev && npm run build`
 - Start: `npm start`
 - Health: `/health`
 - Environment: `NODE_ENV=production`, Node 24
