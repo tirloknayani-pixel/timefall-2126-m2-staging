@@ -1,7 +1,8 @@
+import {facilityColliders} from '../shared/facility';
 import {io,type Socket} from 'socket.io-client';
 import type {RoomState,Session,Reply,InputCommand} from '../shared/protocol';
 import {move} from '../shared/collision.js';import {COLLIDERS,SPEED,TICK_MS} from '../shared/world-map';
-const KEY='timefall-m3-session';
+const KEY='timefall-m4-session';
 export class Network{
  readonly socket:Socket=io({autoConnect:false,transports:['websocket','polling'],tryAllTransports:true,reconnection:true,reconnectionDelay:500,reconnectionDelayMax:2500});
  state:RoomState|null=null;session:Session|null=null;status='Connecting…';connected=false;offset=0;prediction={x:0,z:11};sequence=0;pending:InputCommand[]=[];
@@ -21,14 +22,15 @@ export class Network{
  private accept(state:RoomState){if(!this.session||state.code!==this.session.code||state.serverTime<this.lastStateTime||(this.state&&state.epoch<this.state.epoch))return;const changedEpoch=state.epoch!==this.state?.epoch;this.lastStateTime=state.serverTime;this.offset=state.serverTime-Date.now();this.snapshots++;this.receivedBytes+=JSON.stringify(state).length;const me=state.players.find(p=>p.id===this.session!.playerId);if(!me)return;
  if(changedEpoch){this.pending=[];this.sequence=me.lastSeq;}else this.sequence=Math.max(this.sequence,me.lastSeq);
  if(me.incapacitated)this.pending=[];
- this.pending=this.pending.filter(command=>command.epoch===state.epoch&&command.seq>me.appliedSeq);let predicted={x:me.x,z:me.z};for(const command of this.pending)predicted=move(predicted,command.x*SPEED*.05,command.z*SPEED*.05,COLLIDERS);
+ this.pending=this.pending.filter(command=>command.epoch===state.epoch&&command.seq>me.appliedSeq);let predicted={x:me.x,z:me.z};for(const command of this.pending)predicted=move(predicted,command.x*SPEED*.05,command.z*SPEED*.05,[...COLLIDERS,...facilityColliders(state.facility,state.objective.stage,['success','timeout'].includes(state.survival.event.status))]);
  const correction=Math.hypot(predicted.x-this.prediction.x,predicted.z-this.prediction.z);if(!changedEpoch&&correction>.05){this.corrections++;this.maxCorrection=Math.max(this.maxCorrection,correction);}this.prediction=predicted;this.state=state;this.onState(state);
  }
- private sendInput(){const state=this.state;if(!this.connected||!this.session||!state||this.me?.incapacitated||state.phase!=='playing'||Date.now()+this.offset<state.arrivalEndsAt)return;const m=this.getInput();const command:InputCommand={epoch:state.epoch,seq:++this.sequence,x:m.x,z:m.z};this.pending.push(command);if(this.pending.length>40)this.pending.shift();this.prediction=move(this.prediction,command.x*SPEED*.05,command.z*SPEED*.05,COLLIDERS);this.inputs++;
+ private sendInput(){const state=this.state;if(!this.connected||!this.session||!state||this.me?.incapacitated||state.phase!=='playing'||Date.now()+this.offset<state.arrivalEndsAt)return;const m=this.getInput();const command:InputCommand={epoch:state.epoch,seq:++this.sequence,x:m.x,z:m.z};this.pending.push(command);if(this.pending.length>40)this.pending.shift();this.prediction=move(this.prediction,command.x*SPEED*.05,command.z*SPEED*.05,[...COLLIDERS,...facilityColliders(state.facility,state.objective.stage,['success','timeout'].includes(state.survival.event.status))]);this.inputs++;
  this.socket.timeout(6000).emit('player:input',command,(error:Error|null,reply:Reply)=>{if(error||!reply?.ok){this.inputRejections++;this.pending=this.pending.filter(p=>p.seq!==command.seq);}});
  }
  async interact(target:'beacon'|'signal'){if(!this.state)return;const requestId=Array.from(crypto.getRandomValues(new Uint8Array(16)),v=>v.toString(16).padStart(2,'0')).join('');const reply=await this.request('objective:interact',{epoch:this.state.epoch,objectiveVersion:this.state.objective.version,target,requestId});if(!reply.ok)this.onNotice(reply.message);return reply;}
  async survival(kind:'collect'|'revive'|'choose'|'contribute',target:string){if(!this.state)return;const reply=await this.request('survival:action',{epoch:this.state.epoch,eventId:this.state.survival.event.id,requestId:crypto.randomUUID(),kind,target});if(!reply.ok)this.onNotice(reply.message);return reply;}
+ async facility(kind:string,target:string){if(!this.state)return;const reply=await this.request('facility:action',{epoch:this.state.epoch,eventId:this.state.facility.id,requestId:crypto.randomUUID(),kind,target});if(!reply.ok)this.onNotice(reply.message);return reply;}
  async leave(){const reply=await this.request('room:leave',{});if(reply.ok)this.clearSession();return reply;}
  get me(){return this.state?.players.find(p=>p.id===this.session?.playerId);}
  diagnostics(){return {connected:this.connected,status:this.status,code:this.session?.code,playerId:this.session?.playerId,socketId:this.socket.id,transport:this.socket.io.engine?.transport.name,snapshots:this.snapshots,inputs:this.inputs,inputRejections:this.inputRejections,corrections:this.corrections,maxCorrection:this.maxCorrection,receivedBytes:this.receivedBytes,pending:this.pending.length,prediction:{...this.prediction},state:this.state};}

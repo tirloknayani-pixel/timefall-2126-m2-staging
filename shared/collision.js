@@ -1,4 +1,4 @@
-export const bounds={minX:-22,maxX:22,minZ:-42,maxZ:22};
+export const bounds={minX:-22,maxX:22,minZ:-114,maxZ:22};
 export const radius=0.42;
 export function blocked(x,z,boxes){
  if(x<bounds.minX+radius||x>bounds.maxX-radius||z<bounds.minZ+radius||z>bounds.maxZ-radius)return true;

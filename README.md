@@ -1,6 +1,6 @@
-# TIMEFALL: 2126 — Milestone 3
+# TIMEFALL: 2126 — Milestone 4
 
-A cinematic low-poly Three.js adventure prototype with genuine server-authoritative multiplayer. Two to six explorers arrive in an abandoned future city, scan a shared emergency beacon and trace a distant portal signal. M3 adds server-authoritative survival, supplies, a security drone, a timed two-operator encounter, and teammate revival. Later routes and endings remain out of scope.
+A cinematic low-poly Three.js adventure prototype with genuine server-authoritative multiplayer. Two to six explorers arrive in an abandoned future city, scan a shared emergency beacon and trace a distant portal signal. M3 adds server-authoritative survival, supplies, a security drone, a timed two-operator encounter, and teammate revival. M4 extends the avenue into the navigable HELIX AI facility. The portal finale and endings remain out of scope.
 
 ## Install, build and run
 
@@ -30,7 +30,7 @@ Temporary disconnects reserve a slot for 90 seconds. Reload or return in the sam
 
 `shared/` contains strict Zod schemas, types and map geometry. `src/network.ts` handles transport and prediction. `src/main.ts`, `world.ts`, `controls.ts` and `style.css` preserve M1's graphics and controls while presenting server state. Cryptographically random reconnect tokens use tab-scoped sessionStorage only for restoration; tokens never enter teammate broadcasts. Duplicate nicknames do not determine identity. Packet limits and rate bounds constrain malfunctioning clients.
 
-Rooms are in-memory and single-process. Server restarts lose rooms. Run exactly one instance; scaling requires shared authoritative infrastructure beyond M3. Do not share reconnect tokens/browser storage.
+Rooms are in-memory and single-process. Server restarts lose rooms. Run exactly one instance; scaling requires shared authoritative infrastructure beyond M4. Do not share reconnect tokens/browser storage.
 
 ## Tests
 
@@ -96,3 +96,32 @@ M3 adds `survival:action` strict payload validation, range/epoch/event checks, d
 M2 remains on repository `main` at commit `88817e11030815fd4f7a798b9602b77c353dc186` and https://timefall-2126-m2-staging.onrender.com/ . M3 source uses branch `m3-staging` in the same repository and a separate Render Free service. M1 and its backup are unchanged. No M4 route, later facility, resource crisis or portal finale is implemented.
 
 The creator reports a successful two-player physical-phone test of M2. That report does not establish physical-phone performance for M3; M3 still requires real-phone testing.
+
+## M4 HELIX facility walkthrough
+
+Resolve the city security event (success or timeout), then trace the signal at the north barrier. Two different explorers hold WEST/EAST entry stations within 8 seconds, staying nearby until entry opens. In the memory vault, different explorers read ALPHA and BETA fragments at opposite terminals. Share the symbols, then choose ALPHA–BETA at CIPHER. Each run varies the symbols. Wrong answers cost 8 operator Health and +5 Alert.
+
+Cross the central research door. Explore optional caches, avoid the scanner field along the sides, or distract it for 8 Energy/20 seconds or disable it for 2 Materials. The reactor patrol moves across the middle; avoid it or divert it at PATROL for 10 Energy. Challenging it costs +5 Alert and increases its damage.
+
+At ROUTE, choose 12 Energy, 3 Materials, or overload (no supplies, −15 team Health, +15 Alert). Different explorers operate GENERATOR and RELAY. The transit checkpoint opens; an optional archive grants +8 Energy and fictional portal information. This is the M4 endpoint: no finale or endings.
+
+Supplies and walking preserve the M3 rules. Collectibles reward once. Incapacitated explorers need a standing connected teammate nearby. Scanner hits cause 12 damage; patrol hits 18 (26 if provoked), every 2.5 seconds at most. All tuning and station positions are in `shared/facility.ts`. Reservation expiry recalculates cooperation for survivors; temporary disconnect retains identity and completed contributions, while incapacitated power contributors stop counting.
+
+### M4 tests
+
+```sh
+npm run build
+npm test
+npm run test:facility
+CHROMIUM_PATH=/path/to/chromium node tests/facility-browser.mjs
+CHROMIUM_PATH=/path/to/chromium node tests/survival-browser.mjs
+BASE_URL=https://YOUR-M4.onrender.com CHROMIUM_PATH=/path/to/chromium node tests/facility-browser.mjs
+```
+
+Browser tests launch two independent Chromium processes. They use keyboard traversal plus actual touch interactions on a mobile viewport; this is not physical-phone testing. Playwright browsers can be installed with `npx playwright install chromium`, then set CHROMIUM_PATH to the installed executable. Only set BROWSER_PROXY if your environment requires an HTTP proxy.
+
+### Separate deployment and preservation
+
+M4 uses branch `m4-staging` of `tirloknayani-pixel/timefall-2126-m2-staging`, separate Render Free service `timefall-2126-m4-staging`. Build `npm ci --include=dev && npm run build`; start `npm start`; health `/health`; Node 24; one instance. Runtime uses compiled JS and production dependencies, not tsx/Vite. Set NODE_ENV=production. Render supplies PORT and HTTPS. Set auto-deploy off for controlled staging. M2 `main` and M3 `m3-staging` and their services remain unchanged. Free services may sleep; active rooms are in memory and do not survive server restarts.
+
+No credentials or personal/private files are required. Reconnect tokens remain opaque and tab-scoped; do not publish them.
