@@ -1,5 +1,7 @@
 # TIMEFALL: 2126 — Milestone 4
 
+M4 public staging: https://timefall-2126-m4-staging.onrender.com/
+
 A cinematic low-poly Three.js adventure prototype with genuine server-authoritative multiplayer. Two to six explorers arrive in an abandoned future city, scan a shared emergency beacon and trace a distant portal signal. M3 adds server-authoritative survival, supplies, a security drone, a timed two-operator encounter, and teammate revival. M4 extends the avenue into the navigable HELIX AI facility. The portal finale and endings remain out of scope.
 
 ## Install, build and run
@@ -93,9 +95,9 @@ M3 adds `survival:action` strict payload validation, range/epoch/event checks, d
 
 ## M2 recovery and scope
 
-M2 remains on repository `main` at commit `88817e11030815fd4f7a798b9602b77c353dc186` and https://timefall-2126-m2-staging.onrender.com/ . M3 source uses branch `m3-staging` in the same repository and a separate Render Free service. M1 and its backup are unchanged. No M4 route, later facility, resource crisis or portal finale is implemented.
+M2 remains on repository `main` at commit `88817e11030815fd4f7a798b9602b77c353dc186` and https://timefall-2126-m2-staging.onrender.com/ . M3 source uses branch `m3-staging` in the same repository and a separate Render Free service. M1 and its backup are unchanged. This M4 branch adds the HELIX facility; the preserved M3 deployment remains unchanged. The resource-crisis adventure and portal finale remain later work.
 
-The creator reports a successful two-player physical-phone test of M2. That report does not establish physical-phone performance for M3; M3 still requires real-phone testing.
+The creator reports a successful two-player physical-phone test of M2. That report does not establish physical-phone performance for M3; M3 and M4 still require real-phone testing.
 
 ## M4 HELIX facility walkthrough
 
