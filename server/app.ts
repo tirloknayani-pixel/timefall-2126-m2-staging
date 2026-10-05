@@ -7,7 +7,7 @@ export function createTimefallApp(options:Options={}){
  let ticks=0;const stats={snapshots:0,inputAccepted:0,rejected:0,connections:0};
  const broadcast=(code:string)=>{if(manager.rooms.has(code)){io.to(code).emit('room:state',manager.state(code));stats.snapshots++;}};
  const manager=new RoomManager(options.graceMs??90_000,options.clock??Date.now,n=>io.to(n.code).emit('room:notice',n),broadcast);
- const step=()=>{manager.tick();if(++ticks%2===0)for(const [code,room] of manager.rooms)if(room.phase==='playing'&&[...room.players.values()].some(p=>p.socketId))broadcast(code);};
+ const step=()=>{manager.tick();if(++ticks%2===0)for(const [code,room] of manager.rooms)if(room.phase==='playing'&&room.portal.status!=='RESOLVED'&&[...room.players.values()].some(p=>p.socketId))broadcast(code);};
  const timer=options.manual?null:setInterval(step,50);
  const creationBudgets=new Map<string,{at:number;count:number}>();
  io.on('connection',socket=>{stats.connections++;const buckets=new Map<string,{tokens:number;at:number}>();let lastErrorAt=0;
