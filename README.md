@@ -1,7 +1,7 @@
-# TIMEFALL: 2126 — M6
+# TIMEFALL: 2126 — Final Release Candidate
 A real 2–6-player cooperative Three.js browser adventure. Humans arrive in 2126, restore a beacon, survive city security, solve the HELIX facility and choose their future at the Timefall portal. Fictional nicknames only; no account needed.
 
-M6 staging is deployed separately from the preserved M5 service.
+M7 final release candidate is deployed separately from all preserved milestone services. M2–M6 staging/history remain unchanged.
 
 ## Run
 Node 24 (24.19.0 tested locally). `npm ci --include=dev`, `npm run build`, `npm start`. Open http://localhost:3000 (or the PORT printed at startup). The server binds `0.0.0.0:$PORT`; /health reports milestone 5. For development run `npm run dev:server` and `npm run dev`.
@@ -29,10 +29,12 @@ Build first, then `npm test` (169 tests: 5 collision, 46 multiplayer integration
 `CHROMIUM_PATH=/path/to/chromium node tests/portal-browser.mjs` launches TWO independent Chromium processes, desktop and emulated touch portrait. It includes two full normal journeys, HELIX and safe-return endings, damage/revive, reconnect, host transfer, isolation, reset and screenshots. Optional BASE_URL runs against public staging; BROWSER_PROXY supports the managed environment. Never disable TLS validation. `node tests/multiplayer-browser.mjs`, `node tests/survival-browser.mjs`, `node tests/facility-browser.mjs` retain regression checks. `node tests/production-smoke.mjs` verifies npm start, PORT, root, health and WebSocket with the compiled build.
 
 ## Deploy
-Use a separate `m5-staging` branch and Render Free Node service, never update preserved M2–M4 services. Build `npm ci --include=dev && npm run build`; start `npm start`; NODE_ENV=production, NODE_VERSION=24.19.0; health endpoint /health. `render.yaml` and Dockerfile are supplied. Express serves built client and same-origin Socket.IO over HTTPS/WSS. No secrets needed. Free cold starts and server restarts interrupt in-memory rooms. One instance only; horizontal scaling would require a shared room simulation/store and is outside M5.
+Production candidate uses branch `m7-release` on a separate Render Free Node service. Build `npm ci --include=dev && npm run build`; start `npm start`; `NODE_ENV=production`; `NODE_VERSION=24.19.0`; health endpoint `/health`. The server binds `0.0.0.0:$PORT`. Express serves the built client and same-origin Socket.IO over HTTPS/WSS. No secrets are required. Free cold starts and server restarts interrupt in-memory rooms. One instance only; horizontal scaling would require shared room simulation/state.
+
+Physical-phone release validation is documented in `MANUAL_TEST.md` and must be reported separately from Chromium emulation.
 
 ## Performance / scope
-Low-poly reused/instanced cuboids, one portal label atlas, bounded sentry geometry, no particle cloud/postprocessing/shadows. Low quality renders at DPR .75 and MSAA is disabled to reduce software fill cost. Software Chromium FPS is not physical phone performance. M5 completes core story; M6 audio/polish/accessibility/refinement remains unimplemented.
+Low-poly reused/instanced cuboids, one portal label atlas, bounded sentry geometry, no particle cloud/postprocessing/shadows. Low quality renders at DPR .75 and MSAA is disabled to reduce software fill cost. Software Chromium FPS is not physical phone performance. M6 polish is complete. M7 adds release QA/deployment/documentation only; authoritative gameplay semantics remain unchanged.
 Preserved M4 branch `m4-staging`, commit `21f62f6727cc8fcab2dfeb7884ce04c76d30e433`. M1–M3 backups and staging remain untouched.
 
 
@@ -40,3 +42,7 @@ Preserved M4 branch `m4-staging`, commit `21f62f6727cc8fcab2dfeb7884ce04c76d30e4
 M6 adds lightweight WebAudio cues and ambience, independent volume/mute controls, reduced-motion enforcement, camera sensitivity, contextual onboarding, improved connection/rejection copy, mobile safe-area layout, keyboard focus visibility and HUD/ending presentation polish. These are client presentation features; authoritative movement, resources, timers, puzzles and deterministic endings remain server-owned and unchanged.
 
 <!-- M6 public acceptance workflow trigger: independent Chromium verification -->
+
+
+## M7 release candidate
+This branch exists only for final QA, production deployment and physical-device validation. Do not merge over preserved milestone branches or services. Release-ready status requires successful production regression plus explicit physical-device results.
