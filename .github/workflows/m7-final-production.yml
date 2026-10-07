@@ -1,0 +1,52 @@
+name: M7 Final Production QA
+on:
+  push:
+    branches: [m7-release]
+  workflow_dispatch:
+jobs:
+  final-production-browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      BASE_URL: https://timefall-2126-final.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Build release and authoritative suite
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Resolve Chromium path
+        run: |
+          CHROME="$(find "$HOME/.cache/ms-playwright" -type f -path '*/chrome-linux64/chrome' | head -n 1)"
+          test -x "$CHROME"
+          echo "CHROMIUM_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: M6 polish accessibility mobile reconnect
+        run: set -o pipefail; node tests/m6-browser.mjs 2>&1 | tee m6-browser.log
+      - name: M2 multiplayer regression
+        run: set -o pipefail; node tests/multiplayer-browser.mjs 2>&1 | tee m2-browser.log
+      - name: M3 survival revive cooperation
+        run: set -o pipefail; node tests/survival-browser.mjs 2>&1 | tee m3-browser.log
+      - name: M4 HELIX facility puzzles
+        run: set -o pipefail; node tests/facility-browser.mjs 2>&1 | tee m4-browser.log
+      - name: M5 portal finale full journey
+        run: set -o pipefail; node tests/portal-browser.mjs 2>&1 | tee m5-browser.log
+      - name: Production smoke
+        run: set -o pipefail; node tests/production-smoke.mjs 2>&1 | tee production-smoke.log
+      - name: Upload M7 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-final-production-evidence
+          path: |
+            *-browser.log
+            production-smoke.log
+            test-evidence/**
+          if-no-files-found: ignore
