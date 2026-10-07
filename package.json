@@ -7,13 +7,14 @@
     "start": "node dist-server/server/index.js",
     "dev": "vite --host 0.0.0.0",
     "dev:server": "tsx server/index.ts",
-    "build": "tsc -p tsconfig.server.json && tsc --noEmit && vite build",
+    "build": "npm run build:app && npm test",
     "test": "node --test tests/collision.test.mjs && npm run test:integration && npm run test:survival && npm run test:facility && npm run test:portal",
     "test:integration": "node --test tests/integration.test.mjs",
     "test:browser": "node tests/multiplayer-browser.mjs",
     "test:facility": "node --test tests/facility.test.mjs",
     "test:survival": "node --test tests/survival.test.mjs",
-    "test:portal": "node --test tests/portal.test.mjs"
+    "test:portal": "node --test tests/portal.test.mjs",
+    "build:app": "tsc -p tsconfig.server.json && tsc --noEmit && vite build"
   },
   "dependencies": {
     "express": "^5.2.1",
