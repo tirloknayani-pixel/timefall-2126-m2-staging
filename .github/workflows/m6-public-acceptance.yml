@@ -1,0 +1,40 @@
+name: M6 Public Acceptance
+on:
+  push:
+    branches: [m6-staging]
+jobs:
+  public-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      BASE_URL: https://timefall-2126-m6-staging.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Resolve Chromium path
+        run: echo "CHROMIUM_PATH=$(node -e \"import('@playwright/test').then(m=>console.log(m.chromium.executablePath()))\")" >> "$GITHUB_ENV"
+      - name: M6 polish browser acceptance
+        run: node tests/m6-browser.mjs 2>&1 | tee m6-browser.log
+      - name: M2 browser regression
+        run: node tests/multiplayer-browser.mjs 2>&1 | tee m2-browser.log
+      - name: M3 browser regression
+        run: node tests/survival-browser.mjs 2>&1 | tee m3-browser.log
+      - name: M4 browser regression
+        run: node tests/facility-browser.mjs 2>&1 | tee m4-browser.log
+      - name: M5 browser regression
+        run: node tests/portal-browser.mjs 2>&1 | tee m5-browser.log
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m6-public-browser-evidence
+          path: |
+            *-browser.log
+            test-evidence/**
+          if-no-files-found: ignore
