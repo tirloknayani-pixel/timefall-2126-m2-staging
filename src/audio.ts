@@ -1,0 +1,13 @@
+export type AudioCue='ui'|'objective'|'warning'|'damage'|'revive'|'portal'|'ending';
+const STORE='timefall-m6-audio';
+export class GameAudio{
+ private ctx:AudioContext|null=null;private master:GainNode|null=null;private ambience:GainNode|null=null;private sfx:GainNode|null=null;private drone:OscillatorNode|null=null;private unlocked=false;
+ masterLevel=0.75;ambienceLevel=0.32;sfxLevel=0.75;muted=false;
+ constructor(){try{const s=JSON.parse(localStorage.getItem(STORE)||'{}');this.masterLevel=Number.isFinite(s.master)?s.master:.75;this.ambienceLevel=Number.isFinite(s.ambience)?s.ambience:.32;this.sfxLevel=Number.isFinite(s.sfx)?s.sfx:.75;this.muted=Boolean(s.muted);}catch{}}
+ private save(){try{localStorage.setItem(STORE,JSON.stringify({master:this.masterLevel,ambience:this.ambienceLevel,sfx:this.sfxLevel,muted:this.muted}));}catch{}}
+ unlock(){if(this.unlocked)return;const AC=window.AudioContext||(window as any).webkitAudioContext;if(!AC)return;this.ctx=new AC();this.master=this.ctx.createGain();this.ambience=this.ctx.createGain();this.sfx=this.ctx.createGain();this.ambience.connect(this.master);this.sfx.connect(this.master);this.master.connect(this.ctx.destination);this.drone=this.ctx.createOscillator();const filter=this.ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=180;this.drone.type='sine';this.drone.frequency.value=48;this.drone.connect(filter);filter.connect(this.ambience);this.drone.start();this.unlocked=true;this.apply();}
+ private apply(){if(!this.master||!this.ambience||!this.sfx)return;const t=this.ctx!.currentTime;this.master.gain.setTargetAtTime(this.muted?0:this.masterLevel,t,.03);this.ambience.gain.setTargetAtTime(this.ambienceLevel*.08,t,.08);this.sfx.gain.setTargetAtTime(this.sfxLevel,t,.03);this.save();}
+ set(kind:'master'|'ambience'|'sfx',value:number){if(kind==='master')this.masterLevel=value;if(kind==='ambience')this.ambienceLevel=value;if(kind==='sfx')this.sfxLevel=value;this.apply();}
+ setMuted(value:boolean){this.muted=value;this.apply();}
+ cue(kind:AudioCue){if(!this.ctx||!this.sfx||this.muted)return;const now=this.ctx.currentTime,o=this.ctx.createOscillator(),g=this.ctx.createGain();const data:Record<AudioCue,[number,number,number]>={ui:[360,520,.07],objective:[520,780,.18],warning:[180,130,.2],damage:[120,70,.16],revive:[330,660,.22],portal:[220,880,.3],ending:[440,660,.45]};const [a,b,d]=data[kind];o.type=kind==='warning'||kind==='damage'?'sawtooth':'sine';o.frequency.setValueAtTime(a,now);o.frequency.exponentialRampToValueAtTime(Math.max(30,b),now+d);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(kind==='ui'?.05:.1,now+.015);g.gain.exponentialRampToValueAtTime(.0001,now+d);o.connect(g);g.connect(this.sfx);o.start(now);o.stop(now+d+.02);}
+}
