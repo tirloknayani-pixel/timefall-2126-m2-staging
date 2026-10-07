@@ -18,7 +18,11 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Resolve Chromium path
-        run: echo "CHROMIUM_PATH=$(node -e \"import('@playwright/test').then(m=>console.log(m.chromium.executablePath()))\")" >> "$GITHUB_ENV"
+        shell: bash
+        run: |
+          CHROME="$(find "$HOME/.cache/ms-playwright" -type f -path '*/chrome-linux64/chrome' | head -n 1)"
+          test -x "$CHROME"
+          echo "CHROMIUM_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: M6 polish browser acceptance
         run: node tests/m6-browser.mjs 2>&1 | tee m6-browser.log
       - name: M2 browser regression
