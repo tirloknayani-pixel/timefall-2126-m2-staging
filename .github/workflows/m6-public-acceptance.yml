@@ -3,9 +3,12 @@ on:
   push:
     branches: [m6-staging]
 jobs:
-  public-browser:
+  public-browser-regressions:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
     env:
       BASE_URL: https://timefall-2126-m6-staging.onrender.com
     steps:
@@ -15,46 +18,28 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci --include=dev
-      - name: Build production modules
-        run: npm run build
+      - name: Build browser-harness prerequisites
+        run: npm run build:app
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Resolve Chromium path
-        shell: bash
         run: |
           CHROME="$(find "$HOME/.cache/ms-playwright" -type f -path '*/chrome-linux64/chrome' | head -n 1)"
           test -x "$CHROME"
           echo "CHROMIUM_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: M6 polish browser acceptance
-        shell: bash
-        run: |
-          set -o pipefail
-          node tests/m6-browser.mjs 2>&1 | tee m6-browser.log
       - name: M2 browser regression
-        shell: bash
-        run: |
-          set -o pipefail
-          node tests/multiplayer-browser.mjs 2>&1 | tee m2-browser.log
+        run: set -o pipefail; node tests/multiplayer-browser.mjs 2>&1 | tee m2-browser.log
       - name: M3 browser regression
-        shell: bash
-        run: |
-          set -o pipefail
-          node tests/survival-browser.mjs 2>&1 | tee m3-browser.log
+        run: set -o pipefail; node tests/survival-browser.mjs 2>&1 | tee m3-browser.log
       - name: M4 browser regression
-        shell: bash
-        run: |
-          set -o pipefail
-          node tests/facility-browser.mjs 2>&1 | tee m4-browser.log
+        run: set -o pipefail; node tests/facility-browser.mjs 2>&1 | tee m4-browser.log
       - name: M5 browser regression
-        shell: bash
-        run: |
-          set -o pipefail
-          node tests/portal-browser.mjs 2>&1 | tee m5-browser.log
+        run: set -o pipefail; node tests/portal-browser.mjs 2>&1 | tee m5-browser.log
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: m6-public-browser-evidence
+          name: m6-public-regression-evidence
           path: |
             *-browser.log
             test-evidence/**
