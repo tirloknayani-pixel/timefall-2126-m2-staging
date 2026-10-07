@@ -15,6 +15,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci --include=dev
+      - name: Build production modules
+        run: npm run build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Resolve Chromium path
@@ -24,15 +26,30 @@ jobs:
           test -x "$CHROME"
           echo "CHROMIUM_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: M6 polish browser acceptance
-        run: node tests/m6-browser.mjs 2>&1 | tee m6-browser.log
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/m6-browser.mjs 2>&1 | tee m6-browser.log
       - name: M2 browser regression
-        run: node tests/multiplayer-browser.mjs 2>&1 | tee m2-browser.log
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/multiplayer-browser.mjs 2>&1 | tee m2-browser.log
       - name: M3 browser regression
-        run: node tests/survival-browser.mjs 2>&1 | tee m3-browser.log
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/survival-browser.mjs 2>&1 | tee m3-browser.log
       - name: M4 browser regression
-        run: node tests/facility-browser.mjs 2>&1 | tee m4-browser.log
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/facility-browser.mjs 2>&1 | tee m4-browser.log
       - name: M5 browser regression
-        run: node tests/portal-browser.mjs 2>&1 | tee m5-browser.log
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/portal-browser.mjs 2>&1 | tee m5-browser.log
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
