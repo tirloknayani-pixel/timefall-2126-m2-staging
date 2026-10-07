@@ -38,3 +38,5 @@ Preserved M4 branch `m4-staging`, commit `21f62f6727cc8fcab2dfeb7884ce04c76d30e4
 
 ## M6 release polish
 M6 adds lightweight WebAudio cues and ambience, independent volume/mute controls, reduced-motion enforcement, camera sensitivity, contextual onboarding, improved connection/rejection copy, mobile safe-area layout, keyboard focus visibility and HUD/ending presentation polish. These are client presentation features; authoritative movement, resources, timers, puzzles and deterministic endings remain server-owned and unchanged.
+
+<!-- M6 public acceptance workflow trigger: independent Chromium verification -->
