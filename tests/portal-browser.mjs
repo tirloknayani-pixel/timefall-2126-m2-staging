@@ -4,27 +4,33 @@ const launch=()=>chromium.launch({executablePath,...(process.env.BROWSER_PROXY?{
 const v=p=>p.evaluate(()=>window.__M5);const wait=(p,fn,arg)=>p.waitForFunction(fn,arg,{timeout:120000});const shot=(p,n)=>p.screenshot({path:resolve(out,n+'.png')});const pass=(name,condition=true)=>{assert.ok(condition,name);checks.push({name,result:'PASS'});console.log('PASS',name)};
 async function walk(p,key,axis,goal){
  await wait(p,()=>!document.querySelector('dialog[open]'));
- const reverse={w:'s',s:'w',a:'d',d:'a'}[key];
+ const direction=(pos)=>axis==='z'?(goal<pos?'w':'s'):(goal<pos?'a':'d');
  const started=Date.now();
  const startState=await p.evaluate(({axis,key,goal})=>{const v=window.__M5;return {axis,key,goal,prediction:{...v.network.prediction},server:v.network.state.players.find(x=>x.id===v.network.playerId),stage:v.stage,facility:v.network.state.facility?.stage,portal:v.network.state.portal?.status,active:document.activeElement?.id||document.activeElement?.tagName};},{axis,key,goal});
  console.log('WALK_START',JSON.stringify(startState));
- let last;
- for(let i=0;i<160;i++){
-  const pos=await p.evaluate(axis=>window.__M5.network.prediction[axis],axis);
-  const delta=goal-pos;
-  if(Math.abs(delta)<=0.55)break;
-  const desired=(axis==='z'?(delta<0?'w':'s'):(delta<0?'a':'d'));
-  const press=desired===key?key:reverse;
-  await p.keyboard.down(press);await p.waitForTimeout(90);await p.keyboard.up(press);await p.waitForTimeout(60);
-  last=await p.evaluate(({axis,goal,key})=>{const v=window.__M5;return {axis,key,goal,prediction:{...v.network.prediction},server:v.network.state.players.find(x=>x.id===v.network.playerId),stage:v.stage,facility:v.network.state.facility?.stage,portal:v.network.state.portal?.status};},{axis,goal,key});
+ let pos=await p.evaluate(axis=>window.__M5.network.prediction[axis],axis);
+ // Travel at normal gameplay speed while safely away from the interaction target.
+ if(Math.abs(goal-pos)>2){
+  const travelKey=direction(pos);
+  await p.keyboard.down(travelKey);
+  try{
+   await p.waitForFunction(([axis,goal])=>Math.abs(window.__M5.network.prediction[axis]-goal)<=1.6,[axis,goal],{timeout:60000});
+  }finally{await p.keyboard.up(travelKey);}
+ }
+ // Fine positioning prevents the old one-sided threshold overshoot.
+ for(let i=0;i<30;i++){
+  pos=await p.evaluate(axis=>window.__M5.network.prediction[axis],axis);
+  if(Math.abs(goal-pos)<=0.55)break;
+  const fineKey=direction(pos);
+  await p.keyboard.down(fineKey);await p.waitForTimeout(45);await p.keyboard.up(fineKey);await p.waitForTimeout(35);
  }
  const endState=await p.evaluate(({axis,goal,key})=>{const v=window.__M5;return {axis,key,goal,prediction:{...v.network.prediction},server:v.network.state.players.find(x=>x.id===v.network.playerId),stage:v.stage,facility:v.network.state.facility?.stage,portal:v.network.state.portal?.status};},{axis,goal,key});
  if(Math.abs(endState.prediction[axis]-goal)>0.8){
-  console.error('WALK_TIMEOUT',JSON.stringify({elapsedMs:Date.now()-started,start:startState,end:endState,last,browserErrors:[...errors]}));
+  console.error('WALK_TIMEOUT',JSON.stringify({elapsedMs:Date.now()-started,start:startState,end:endState,browserErrors:[...errors]}));
   throw new Error('walk failed to settle near target');
  }
  console.log('WALK_END',JSON.stringify({elapsedMs:Date.now()-started,start:startState,end:endState}));
- await p.waitForTimeout(350);
+ await p.waitForTimeout(250);
 }
 async function probe(p,extra={},reuse=false){return p.evaluate(async([extra,reuse])=>{const state=window.__M5.network.state,ws=window.__acceptanceSocket;const payload=reuse?{...window.__lastPortalAction}:{epoch:state.epoch,eventId:state.portal.id,requestId:crypto.randomUUID(),kind:'repair',target:'coils'};Object.assign(payload,extra);const id=900000+Math.floor(Math.random()*900000);return new Promise((resolve,reject)=>{const listener=e=>{const packet=String(e.data);if(packet.startsWith('43'+id+'[')){ws.removeEventListener('message',listener);clearTimeout(timer);resolve(JSON.parse(packet.slice(packet.indexOf('[')))[0]);}};const timer=setTimeout(()=>{ws.removeEventListener('message',listener);reject(new Error('probe acknowledgement timeout'));},8000);ws.addEventListener('message',listener);ws.send('42'+id+JSON.stringify(['portal:action',payload]));});},[extra,reuse]);}
 async function reset(){await A.locator('#help').click();await A.locator('#reset').click();await wait(B,()=>window.__M5.network.state.phase==='lobby');await A.locator('#readyButton').click();await B.locator('#readyButton').click();await wait(A,()=>window.__M5.network.state.players.every(p=>p.ready));await A.locator('#startGame').click();await wait(A,()=>window.__M5.started&&!window.__M5.intro);await wait(B,()=>window.__M5.started&&!window.__M5.intro);}
