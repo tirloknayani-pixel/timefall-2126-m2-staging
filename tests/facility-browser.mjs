@@ -22,7 +22,18 @@ async function diagnosticWalk(p,key,axis,goal,label){
  console.log('NAV_INPUT_TRACE',JSON.stringify({label,keyTrace,samples}));
  console.log('NAV_END',JSON.stringify(await navState(p,key,axis,goal,label,{player:start.player,prediction:start.network.prediction,blocked:start.blocked},Date.now()-t0)));
 }const pass=(name,condition=true)=>{assert.ok(condition,name);checks.push({name,result:'PASS'});console.log('PASS',name)};
-async function walk(p,key,axis,goal){await wait(p,()=>!document.querySelector('dialog[open]'));await p.keyboard.down(key);try{await wait(p,([axis,goal,key])=>{const me=window.__M4.network.prediction;return key==='w'||key==='a'?me[axis]<=goal:me[axis]>=goal},[axis,goal,key]);}finally{await p.keyboard.up(key);}await p.waitForTimeout(700);}
+async function walk(p,key,axis,goal){
+ await wait(p,()=>!document.querySelector('dialog[open]'));
+ const reverse={w:'s',s:'w',a:'d',d:'a'}[key];
+ for(let i=0;i<160;i++){
+  const pos=await p.evaluate(axis=>window.__M4.network.prediction[axis],axis),delta=goal-pos;
+  if(Math.abs(delta)<=0.55){await p.waitForTimeout(350);return;}
+  const desired=axis==='z'?(delta<0?'w':'s'):(delta<0?'a':'d'),press=desired===key?key:reverse;
+  await p.keyboard.down(press);await p.waitForTimeout(90);await p.keyboard.up(press);await p.waitForTimeout(60);
+ }
+ const end=await p.evaluate(({axis,goal})=>({prediction:{...window.__M4.network.prediction},server:window.__M4.network.state.players.find(x=>x.id===window.__M4.network.playerId),blocked:window.__M4.blocked,axis,goal}),{axis,goal});
+ console.error('WALK_SETTLE_TIMEOUT',JSON.stringify(end));throw new Error('walk failed to settle near target');
+}
 async function reset(){await A.locator('#help').click();await A.locator('#reset').click();await wait(B,()=>window.__M4.network.state.phase==='lobby');await A.locator('#readyButton').click();await B.locator('#readyButton').click();await wait(A,()=>window.__M4.network.state.players.every(p=>p.ready));await A.locator('#startGame').click();await wait(A,()=>window.__M4.started&&!window.__M4.intro);await wait(B,()=>window.__M4.started&&!window.__M4.intro);}
 try{
  for(const mobile of [false,true]){const b=await launch();browsers.push(b);const c=await b.newContext(mobile?{viewport:{width:390,height:844},isMobile:true,hasTouch:true}:{viewport:{width:960,height:640}});const p=await c.newPage();p.on('pageerror',e=>errors.push(String(e)));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});await p.addInitScript(()=>{window.__m4KeyTrace=[];for(const type of ['keydown','keyup'])window.addEventListener(type,e=>{if(['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))window.__m4KeyTrace.push({t:performance.now(),type,key:e.key,repeat:e.repeat,hidden:document.hidden,active:document.activeElement?.id||document.activeElement?.tagName||null});},{capture:true});});if(mobile)B=p;else A=p;}
