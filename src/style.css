@@ -25,3 +25,221 @@ body.touch #joystick,body.touch #cameraHint{display:block}body.touch .controls-h
 :root{--safe-top:max(14px,env(safe-area-inset-top));--safe-right:max(14px,env(safe-area-inset-right));--safe-bottom:max(14px,env(safe-area-inset-bottom));--safe-left:max(14px,env(safe-area-inset-left))}button,input{touch-action:manipulation}button:focus-visible,input:focus-visible{outline:2px solid #9cf5ff;outline-offset:3px}.top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.top-actions button{min-height:40px}.objective{background:linear-gradient(100deg,#071725e8,#10283dcc);border-left:3px solid var(--cyan);backdrop-filter:blur(8px);box-shadow:0 12px 35px #0004}.objective h2{letter-spacing:.01em}.network-strip{padding:6px 9px;border-radius:6px;background:#071725a8;backdrop-filter:blur(6px)}#survivalHUD{border-radius:8px;backdrop-filter:blur(8px);box-shadow:0 8px 28px #0003}#survivalHUD span{min-width:56px}#alertValue{color:#ffd18a!important}.remote-label{border-left-width:4px;font-weight:600}.remote-label.offline::after{content:' · signal lost'}#interaction button:not(:disabled){box-shadow:0 0 0 1px #7cf4ff55,0 0 28px #53dff52b}#connectionBanner{top:calc(var(--safe-top) + 72px);font-weight:600;box-shadow:0 15px 50px #0008}#toast{position:fixed;z-index:90;left:50%;top:calc(var(--safe-top) + 18px);transform:translateX(-50%);width:min(520px,calc(100vw - 32px));padding:10px 14px;border:1px solid #73e9ff66;border-radius:8px;background:#071725ed;color:#e9fbff;text-align:center;box-shadow:0 12px 35px #0008;pointer-events:none}.settings{display:grid;gap:12px;margin:18px 0;padding:14px;border:1px solid #6ecfe744;border-radius:8px;background:#07172588}.settings label{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.settings input[type=range]{width:150px}.tutorial-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.tutorial-cards p{margin:0;padding:10px;border-radius:7px;background:#102b3a;font-size:12px;line-height:1.45}.tutorial-cards b{color:#8ff3ff;font-size:11px;letter-spacing:.08em}.ending-card{box-shadow:0 25px 80px #000a;backdrop-filter:blur(14px)}#endingScreen::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 45%,#87f7ff18,transparent 45%)}body.reduced-motion *,body.reduced-motion *::before,body.reduced-motion *::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 @media(max-width:700px){header{padding-top:var(--safe-top);padding-left:var(--safe-left);padding-right:var(--safe-right)}.top-actions{gap:5px}.top-actions button{min-height:38px;padding:6px 8px;font-size:10px}.network-strip{left:var(--safe-left);right:var(--safe-right);width:max-content;max-width:calc(100vw - 28px)}#survivalHUD{left:var(--safe-left);right:var(--safe-right);top:112px}.objective{left:var(--safe-left);right:var(--safe-right);width:auto;top:171px}.location{left:var(--safe-left);top:151px}#interaction{right:var(--safe-right);bottom:calc(var(--safe-bottom) + 6px)}#joystick{left:var(--safe-left);bottom:calc(var(--safe-bottom) + 10px)}#cameraHint{bottom:calc(var(--safe-bottom) + 142px)}body.touch .bottom-info{bottom:calc(var(--safe-bottom) + 165px)}#message{bottom:calc(var(--safe-bottom) + 215px)}#portalStatus{top:276px;right:var(--safe-right);max-width:60vw}#facilityStatus,#securityStatus{top:276px;left:var(--safe-left);right:var(--safe-right);max-width:none}.tutorial-cards{grid-template-columns:1fr}.settings input[type=range]{width:125px}dialog{max-width:calc(100vw - 24px);max-height:82dvh}.ending-card{max-height:calc(100dvh - var(--safe-top) - var(--safe-bottom) - 20px);padding-bottom:calc(18px + var(--safe-bottom))}}
 @media(max-height:500px){.tutorial-cards{display:none}#survivalHUD{top:64px}.objective{top:105px;left:var(--safe-left);right:auto}.location{top:87px}#portalStatus,#facilityStatus,#securityStatus{top:105px}}
+
+
+/* M7 physical-mobile baseline fixes. Final override layer to resolve legacy cascade conflicts. */
+@media (max-width:700px){
+  header{
+    min-height:92px;
+    padding:calc(var(--safe-top) + 8px) var(--safe-right) 8px var(--safe-left);
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px 10px;
+    align-items:start;
+  }
+  .wordmark{font-size:clamp(14px,4.2vw,18px);line-height:1.05}
+  .wordmark small{font-size:clamp(7px,2.1vw,9px);margin-top:5px}
+  .top-actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(74px,auto));
+    gap:6px;
+    justify-content:end;
+    max-width:52vw;
+  }
+  .top-actions button{
+    min-width:0;
+    min-height:36px;
+    padding:6px 8px;
+    font-size:clamp(9px,2.6vw,11px);
+    line-height:1.1;
+    white-space:nowrap;
+  }
+  #help{grid-column:1/-1}
+  .metrics-toggle{
+    top:calc(var(--safe-top) + 92px);
+    right:var(--safe-right);
+    min-height:32px;
+    padding:5px 8px;
+    font-size:9px;
+    z-index:6;
+  }
+  .network-strip{
+    top:calc(var(--safe-top) + 96px);
+    left:var(--safe-left);
+    right:auto;
+    max-width:calc(100vw - var(--safe-left) - var(--safe-right) - 88px);
+    gap:8px;
+    font-size:9px;
+    padding:5px 7px;
+    z-index:5;
+  }
+  #survivalHUD{
+    top:calc(var(--safe-top) + 134px);
+    left:var(--safe-left);
+    right:var(--safe-right);
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    padding:8px 9px;
+    font-size:9px;
+    z-index:4;
+  }
+  #survivalHUD span{min-width:0;white-space:nowrap;text-align:center}
+  #survivalHUD b{display:block;margin:2px 0 0;font-size:clamp(13px,3.6vw,16px)}
+  .location{
+    top:calc(var(--safe-top) + 184px);
+    left:var(--safe-left);
+    font-size:10px;
+    z-index:4;
+  }
+  .objective{
+    top:calc(var(--safe-top) + 210px);
+    left:var(--safe-left);
+    right:var(--safe-right);
+    width:auto;
+    max-width:none;
+    padding:11px 13px;
+    z-index:4;
+  }
+  .objective h2{font-size:clamp(15px,4.6vw,19px);line-height:1.22;margin:6px 0}
+  .objective p{font-size:clamp(10px,3vw,12px);line-height:1.35;max-height:none;overflow:visible}
+  .objective .eyebrow{font-size:9px}
+  #facilityStatus,#securityStatus,#portalStatus{
+    top:calc(var(--safe-top) + 320px);
+    left:var(--safe-left);
+    right:var(--safe-right);
+    max-width:none;
+    width:auto;
+    z-index:4;
+  }
+
+  body.touch #joystick{
+    width:clamp(88px,24vw,116px);
+    height:clamp(88px,24vw,116px);
+    left:var(--safe-left);
+    bottom:calc(var(--safe-bottom) + 8px);
+  }
+  body.touch #joystick:before{inset:16%}
+  body.touch #stick{
+    width:34%;
+    height:34%;
+    left:33%;
+    top:33%;
+  }
+  body.touch .bottom-info{
+    left:var(--safe-left);
+    bottom:calc(var(--safe-bottom) + clamp(118px,30vw,145px));
+  }
+  .vitals{min-width:90px}
+  .vitals strong{font-size:clamp(18px,5vw,23px)}
+  #cameraHint{
+    right:var(--safe-right);
+    bottom:calc(var(--safe-bottom) + clamp(122px,31vw,150px));
+    font-size:8px;
+  }
+  #interaction{
+    right:var(--safe-right);
+    bottom:calc(var(--safe-bottom) + 8px);
+    width:min(42vw,190px);
+  }
+  #interact{
+    width:100%;
+    min-width:0;
+    max-width:none;
+    min-height:56px;
+    padding:10px 12px;
+    font-size:13px;
+  }
+  #prompt{max-width:100%;font-size:11px}
+  #message{
+    bottom:calc(var(--safe-bottom) + clamp(158px,39vw,190px));
+    width:min(86vw,520px);
+    max-width:none;
+    font-size:11px;
+    padding:9px 12px;
+  }
+
+  /* During arrival, cinematic copy gets its own band and HUD panels stay out of it. */
+  body.intro-active .location,
+  body.intro-active .objective,
+  body.intro-active #facilityStatus,
+  body.intro-active #securityStatus,
+  body.intro-active #portalStatus{visibility:hidden}
+  body.intro-active #introCaption{
+    top:42%;
+    width:min(88vw,520px);
+    z-index:5;
+  }
+  body.intro-active #introCaption h2{
+    font-size:clamp(28px,9vw,42px);
+    line-height:1.05;
+    margin:8px 0;
+  }
+  body.intro-active #introCaption p{font-size:12px;line-height:1.35}
+}
+
+@media (max-width:420px){
+  .top-actions{grid-template-columns:1fr 1fr;max-width:56vw}
+  .top-actions button{padding-inline:6px}
+  #survivalHUD{font-size:8px}
+  .objective{padding:10px 11px}
+}
+
+/* Browser zoom / very narrow effective CSS viewport. */
+@media (max-width:340px){
+  header{min-height:104px}
+  .top-actions{max-width:58vw}
+  .network-strip{top:calc(var(--safe-top) + 108px)}
+  .metrics-toggle{top:calc(var(--safe-top) + 104px)}
+  #survivalHUD{top:calc(var(--safe-top) + 145px);grid-template-columns:repeat(2,1fr)}
+  .location{top:calc(var(--safe-top) + 207px)}
+  .objective{top:calc(var(--safe-top) + 233px)}
+  #facilityStatus,#securityStatus,#portalStatus{top:calc(var(--safe-top) + 350px)}
+}
+
+/* Landscape phones: compact top stack; preserve large touch controls at the bottom corners. */
+@media (max-height:500px) and (orientation:landscape){
+  header{
+    min-height:58px;
+    padding:calc(var(--safe-top) + 5px) var(--safe-right) 5px var(--safe-left);
+    grid-template-columns:minmax(0,1fr) auto;
+  }
+  .wordmark{font-size:13px}
+  .wordmark small{display:none}
+  .top-actions{display:flex;max-width:none;gap:5px}
+  .top-actions button{min-height:30px;padding:4px 7px;font-size:9px}
+  #help{grid-column:auto}
+  .network-strip{top:calc(var(--safe-top) + 59px);left:var(--safe-left)}
+  .metrics-toggle{top:calc(var(--safe-top) + 58px);right:var(--safe-right);display:block}
+  #survivalHUD{
+    top:calc(var(--safe-top) + 58px);
+    left:auto;
+    right:calc(var(--safe-right) + 72px);
+    width:min(330px,46vw);
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    padding:5px 7px;
+  }
+  .location{top:calc(var(--safe-top) + 91px);left:var(--safe-left)}
+  .objective{
+    top:calc(var(--safe-top) + 110px);
+    left:var(--safe-left);
+    right:auto;
+    width:min(275px,43vw);
+    padding:8px 10px;
+  }
+  .objective p{display:none}
+  #facilityStatus,#securityStatus,#portalStatus{
+    top:calc(var(--safe-top) + 110px);
+    left:auto;
+    right:var(--safe-right);
+    width:min(300px,45vw);
+  }
+  body.intro-active .objective,body.intro-active .location{visibility:hidden}
+  body.intro-active #introCaption{top:45%;width:min(55vw,520px)}
+  body.touch #joystick{width:92px;height:92px;bottom:calc(var(--safe-bottom) + 7px)}
+  body.touch .bottom-info{display:none}
+  #cameraHint{bottom:calc(var(--safe-bottom) + 110px)}
+  #interaction{bottom:calc(var(--safe-bottom) + 7px);width:min(180px,28vw)}
+  #message{bottom:calc(var(--safe-bottom) + 112px);width:min(50vw,420px)}
+}
