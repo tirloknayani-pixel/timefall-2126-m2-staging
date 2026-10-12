@@ -2,7 +2,23 @@ import {chromium} from '@playwright/test';import {createTimefallApp} from '../di
 const out=resolve(process.env.BASE_URL?'evidence/m5-staging':'evidence/m5-local');await mkdir(out,{recursive:true});const runtime=process.env.BASE_URL?null:createTimefallApp();const base=process.env.BASE_URL||`http://127.0.0.1:${await runtime.listen()}`;const executablePath=process.env.CHROMIUM_PATH||resolve('../browser-runtime/chromium');const checks=[],errors=[],browsers=[],metrics={base,environment:'Two independent Chromium processes; SwiftShader software WebGL; desktop 960x640 and touch 390x844, not physical phones'};let A,B;
 const launch=()=>chromium.launch({executablePath,...(process.env.BROWSER_PROXY?{proxy:{server:process.env.BROWSER_PROXY}}:{}),args:['--no-sandbox','--no-zygote','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'],env:{...process.env,LD_LIBRARY_PATH:dirname(executablePath),FONTCONFIG_PATH:resolve(dirname(executablePath),'fonts')}});
 const v=p=>p.evaluate(()=>window.__M5);const wait=(p,fn,arg)=>p.waitForFunction(fn,arg,{timeout:120000});const shot=(p,n)=>p.screenshot({path:resolve(out,n+'.png')});const pass=(name,condition=true)=>{assert.ok(condition,name);checks.push({name,result:'PASS'});console.log('PASS',name)};
-async function walk(p,key,axis,goal){await wait(p,()=>!document.querySelector('dialog[open]'));await p.keyboard.down(key);try{await wait(p,([axis,goal,key])=>{const me=window.__M5.network.prediction;return key==='w'||key==='a'?me[axis]<=goal:me[axis]>=goal},[axis,goal,key]);}finally{await p.keyboard.up(key);}await p.waitForTimeout(700);}
+async function walk(p,key,axis,goal){
+ await wait(p,()=>!document.querySelector('dialog[open]'));
+ const started=Date.now();
+ const start=await p.evaluate(({axis,key,goal})=>{const v=window.__M5;return {axis,key,goal,prediction:{...v.network.prediction},server:v.network.state.players.find(x=>x.id===v.network.playerId),stage:v.stage,facility:v.network.state.facility?.stage,portal:v.network.state.portal?.status,active:document.activeElement?.id||document.activeElement?.tagName};},{axis,key,goal});
+ console.log('WALK_START',JSON.stringify(start));
+ await p.keyboard.down(key);
+ try{
+  await wait(p,([axis,goal,key])=>{const me=window.__M5.network.prediction;return key==='w'||key==='a'?me[axis]<=goal:me[axis]>=goal},[axis,goal,key]);
+ }catch(error){
+  const end=await p.evaluate(({axis,key,goal})=>{const v=window.__M5;return {axis,key,goal,prediction:{...v.network.prediction},server:v.network.state.players.find(x=>x.id===v.network.playerId),stage:v.stage,facility:v.network.state.facility?.stage,portal:v.network.state.portal?.status,active:document.activeElement?.id||document.activeElement?.tagName,dialog:Boolean(document.querySelector('dialog[open]'))};},{axis,key,goal});
+  console.error('WALK_TIMEOUT',JSON.stringify({elapsedMs:Date.now()-started,start,end,browserErrors:[...errors]}));
+  throw error;
+ }finally{await p.keyboard.up(key);}
+ const end=await p.evaluate(({axis,key,goal})=>{const v=window.__M5;return {axis,key,goal,prediction:{...v.network.prediction},server:v.network.state.players.find(x=>x.id===v.network.playerId),stage:v.stage,facility:v.network.state.facility?.stage,portal:v.network.state.portal?.status};},{axis,key,goal});
+ console.log('WALK_END',JSON.stringify({elapsedMs:Date.now()-started,start,end}));
+ await p.waitForTimeout(700);
+}
 async function probe(p,extra={},reuse=false){return p.evaluate(async([extra,reuse])=>{const state=window.__M5.network.state,ws=window.__acceptanceSocket;const payload=reuse?{...window.__lastPortalAction}:{epoch:state.epoch,eventId:state.portal.id,requestId:crypto.randomUUID(),kind:'repair',target:'coils'};Object.assign(payload,extra);const id=900000+Math.floor(Math.random()*900000);return new Promise((resolve,reject)=>{const listener=e=>{const packet=String(e.data);if(packet.startsWith('43'+id+'[')){ws.removeEventListener('message',listener);clearTimeout(timer);resolve(JSON.parse(packet.slice(packet.indexOf('[')))[0]);}};const timer=setTimeout(()=>{ws.removeEventListener('message',listener);reject(new Error('probe acknowledgement timeout'));},8000);ws.addEventListener('message',listener);ws.send('42'+id+JSON.stringify(['portal:action',payload]));});},[extra,reuse]);}
 async function reset(){await A.locator('#help').click();await A.locator('#reset').click();await wait(B,()=>window.__M5.network.state.phase==='lobby');await A.locator('#readyButton').click();await B.locator('#readyButton').click();await wait(A,()=>window.__M5.network.state.players.every(p=>p.ready));await A.locator('#startGame').click();await wait(A,()=>window.__M5.started&&!window.__M5.intro);await wait(B,()=>window.__M5.started&&!window.__M5.intro);}
 try{
