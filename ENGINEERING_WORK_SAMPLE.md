@@ -60,8 +60,6 @@ These are documented commands and test entry points, **not a claim that a fresh 
 
 TypeScript, Node.js, Express, Socket.IO, Three.js, Vite, Zod, Playwright, Docker and Render.
 
-## Candidate contribution statement
+## Further documentation
 
-When referencing this project in a job application, describe **only the tasks you personally performed** (including any AI-assisted development) and be prepared to explain the code, debugging steps and test evidence. This document describes the repository; it does not independently verify individual authorship or assessment results.
-
-See [README.md](README.md) for usage, full architecture notes and deployment limitations.
+See [README.md](README.md) for setup, gameplay, architecture, testing commands and deployment limitations.
